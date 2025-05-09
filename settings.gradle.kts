@@ -21,8 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "TaskManager"
 include(":app")
-include(":data")
 include(":domain")
 include(":network")
 include(":common")
- 
+include(":data")

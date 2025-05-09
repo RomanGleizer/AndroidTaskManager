@@ -1,4 +1,3 @@
 package ru.university.common
 
-class MyClass {
-}
+class MyClass
