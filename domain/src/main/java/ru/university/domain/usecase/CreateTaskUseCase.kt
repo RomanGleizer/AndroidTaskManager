@@ -3,8 +3,9 @@ package ru.university.domain.usecase
 import ru.university.domain.model.Task
 import ru.university.domain.repository.TaskRepository
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class CreateTaskUseCase(
+class CreateTaskUseCase @Inject constructor(
     private val repository: TaskRepository
 ) {
     suspend operator fun invoke(

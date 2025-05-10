@@ -11,11 +11,12 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataStoreModule {
-
+object PreferencesModule {
     @Provides
     @Singleton
     fun provideUserPreferencesDataStore(
         @ApplicationContext context: Context
-    ): UserPreferencesDataStore = UserPreferencesDataStore(context)
+    ): UserPreferencesDataStore {
+        return UserPreferencesDataStore(context)
+    }
 }
