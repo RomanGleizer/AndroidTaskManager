@@ -1,0 +1,22 @@
+[
+  {
+    "id": "task1",
+    "project_id": "proj1",
+    "title": "Design UI",
+    "description": "Create wireframes",
+    "assigned_to": "user_2",
+    "status": "TODO",
+    "created_at": "2025-05-03T09:00:00",
+    "due_date": "2025-05-07T17:00:00"
+  },
+  {
+    "id": "task2",
+    "project_id": "proj1",
+    "title": "Setup backend",
+    "description": "Initialize database schema",
+    "assigned_to": "user_1",
+    "status": "IN_PROGRESS",
+    "created_at": "2025-05-04T10:15:00",
+    "due_date": null
+  }
+]
