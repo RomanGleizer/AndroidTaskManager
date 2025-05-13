@@ -16,57 +16,37 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideSignInUseCase(
-        userRepository: UserRepository
-    ): SignInUseCase = SignInUseCase(userRepository)
+    fun provideSignInUseCase(userRepository: UserRepository) = SignInUseCase(userRepository)
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideSignUpUseCase(
-        userRepository: UserRepository
-    ): SignUpUseCase = SignUpUseCase(userRepository)
+    fun provideSignUpUseCase(userRepository: UserRepository) = SignUpUseCase(userRepository)
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideGetProjectsUseCase(
-        projectRepository: ProjectRepository
-    ): GetProjectsUseCase = GetProjectsUseCase(projectRepository)
+    fun provideGetProjectsUseCase(repo: ProjectRepository) = GetProjectsUseCase(repo)
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideCreateProjectUseCase(
-        projectRepository: ProjectRepository
-    ): CreateProjectUseCase = CreateProjectUseCase(projectRepository)
+    fun provideCreateProjectUseCase(repo: ProjectRepository) = CreateProjectUseCase(repo)
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideGetTasksUseCase(
-        taskRepository: TaskRepository
-    ): GetTasksUseCase = GetTasksUseCase(taskRepository)
+    fun provideAddMemberUseCase(repo: ProjectRepository) = AddMemberUseCase(repo)
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideGetTaskUseCase(
-        taskRepository: TaskRepository
-    ): GetTaskUseCase = GetTaskUseCase(taskRepository)
+    fun provideGetTasksUseCase(repo: TaskRepository) = GetTasksUseCase(repo)
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideCreateTaskUseCase(
-        taskRepository: TaskRepository
-    ): CreateTaskUseCase = CreateTaskUseCase(taskRepository)
+    fun provideGetTaskUseCase(repo: TaskRepository) = GetTaskUseCase(repo)
 
     @Provides
     @Singleton
-    @JvmStatic
-    fun provideUpdateTaskStatusUseCase(
-        taskRepository: TaskRepository
-    ): UpdateTaskStatusUseCase = UpdateTaskStatusUseCase(taskRepository)
+    fun provideCreateTaskUseCase(repo: TaskRepository) = CreateTaskUseCase(repo)
+
+    @Provides
+    @Singleton
+    fun provideUpdateTaskStatusUseCase(repo: TaskRepository) = UpdateTaskStatusUseCase(repo)
 }

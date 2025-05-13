@@ -10,12 +10,14 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import ru.university.domain.model.Task
+import ru.university.domain.usecase.AddMemberUseCase
 import ru.university.domain.usecase.GetTasksUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class ProjectDetailViewModel @Inject constructor(
-    private val getTasksUseCase: GetTasksUseCase
+    private val getTasksUseCase: GetTasksUseCase,
+    private val addMemberUseCase: AddMemberUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProjectDetailUiState())
     val uiState: StateFlow<ProjectDetailUiState> = _uiState.asStateFlow()
@@ -43,6 +45,16 @@ class ProjectDetailViewModel @Inject constructor(
             _events.emit(ProjectDetailUiEvent.NavigateToTaskEdit(null, projectId))
         }
     }
+
+    fun onAddMember(projectId: String, userId: String) {
+        viewModelScope.launch {
+            try {
+                addMemberUseCase(projectId, userId)
+            } catch (e: Exception) {
+            }
+        }
+    }
+
 
     private val _events = MutableSharedFlow<ProjectDetailUiEvent>()
     val events: SharedFlow<ProjectDetailUiEvent> = _events

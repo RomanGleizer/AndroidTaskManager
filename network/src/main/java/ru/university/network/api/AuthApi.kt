@@ -4,11 +4,12 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import ru.university.network.model.AuthRequestDto
 import ru.university.network.model.AuthResponseDto
+import ru.university.network.model.SignUpRequestDto
 
 interface AuthApi {
-    @POST("/auth/signin")
-    suspend fun signIn(@Body request: AuthRequestDto): AuthResponseDto
+    @POST("auth/login")
+    suspend fun login(@Body request: AuthRequestDto): AuthResponseDto
 
-    @POST("/auth/signup")
-    suspend fun signUp(@Body request: AuthRequestDto): AuthResponseDto
+    @POST("auth/signup")
+    suspend fun signUp(@Body request: SignUpRequestDto): AuthResponseDto
 }

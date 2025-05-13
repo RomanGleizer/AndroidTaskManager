@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ru.university.taskmanager.ui.screens.CreateProjectScreen
 import ru.university.taskmanager.ui.screens.LoginScreen
 import ru.university.taskmanager.ui.screens.ProjectDetailScreen
 import ru.university.taskmanager.ui.screens.ProjectsListScreen
@@ -21,17 +22,16 @@ import ru.university.taskmanager.viewmodel.TaskDetailViewModel
 import ru.university.taskmanager.viewmodel.TaskEditViewModel
 
 sealed class Screen(val route: String) {
-
     object Login : Screen("login")
     object SignUp : Screen("signup")
-
     object ProjectsList : Screen("projects_list")
+    object CreateProject : Screen("create_project")
     object ProjectDetail : Screen("project_detail/{projectId}") {
-        fun createRoute(projectId: String) = "project_detail/$projectId"
+        fun createRoute(id: String) = "project_detail/$id"
     }
 
     object TaskDetail : Screen("task_detail/{taskId}") {
-        fun createRoute(taskId: String) = "task_detail/$taskId"
+        fun createRoute(id: String) = "task_detail/$id"
     }
 
     object TaskEdit : Screen("task_edit?taskId={taskId}&projectId={projectId}") {
@@ -76,24 +76,30 @@ fun TaskerNavGraph() {
             val vm: ProjectsListViewModel = hiltViewModel()
             ProjectsListScreen(
                 viewModel = vm,
-                onProjectClick = { projectId ->
-                    navController.navigate(Screen.ProjectDetail.createRoute(projectId))
-                },
-                onAddProject = { navController.navigate(Screen.TaskEdit.createRoute(null, "")) }
+                onProjectClick = { navController.navigate(Screen.ProjectDetail.createRoute(it)) },
+                onAddProject = { navController.navigate(Screen.CreateProject.route) }
             )
         }
+
+        composable(Screen.CreateProject.route) {
+            val vm: ProjectsListViewModel = hiltViewModel()
+            CreateProjectScreen(
+                viewModel = vm,
+                onProjectCreated = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() }
+            )
+        }
+
         composable(
             route = Screen.ProjectDetail.route,
             arguments = listOf(navArgument("projectId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val projectId = backStackEntry.arguments?.getString("projectId")!!
+            val projectId = backStackEntry.arguments!!.getString("projectId")!!
             val vm: ProjectDetailViewModel = hiltViewModel()
             ProjectDetailScreen(
                 viewModel = vm,
                 projectId = projectId,
-                onTaskClick = { taskId ->
-                    navController.navigate(Screen.TaskDetail.createRoute(taskId))
-                },
+                onTaskClick = { navController.navigate(Screen.TaskDetail.createRoute(it)) },
                 onAddTask = {
                     navController.navigate(
                         Screen.TaskEdit.createRoute(
@@ -105,6 +111,7 @@ fun TaskerNavGraph() {
                 onBack = { navController.popBackStack() }
             )
         }
+
         composable(
             route = Screen.TaskDetail.route,
             arguments = listOf(navArgument("taskId") { type = NavType.StringType })
