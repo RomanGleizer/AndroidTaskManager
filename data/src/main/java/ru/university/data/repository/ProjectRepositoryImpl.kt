@@ -11,6 +11,8 @@ import ru.university.data.model.ProjectEntity
 import ru.university.domain.model.Project
 import ru.university.domain.repository.ProjectRepository
 import ru.university.network.api.ProjectsApi
+import ru.university.network.model.AddMemberRequestDto
+import ru.university.network.model.CreateProjectRequestDto
 import java.util.UUID
 import javax.inject.Inject
 
@@ -41,13 +43,24 @@ class ProjectRepositoryImpl @Inject constructor(
             createdAt = now
         )
         dao.insert(entity)
-        val dto = api.create(entity.toDto())
+        val dto = api.create(CreateProjectRequestDto(title, description))
         val saved = dto.toEntity()
         dao.insert(saved)
         return saved.toDomain()
     }
 
     override suspend fun addMember(projectId: String, userId: String) {
-        api.addMember(projectId, userId)
+        api.addMember(
+            projectId,
+            AddMemberRequestDto(userId)
+        )
+
+        dao.getById(projectId)
+            ?.let { existing ->
+                val updated = existing.copy(
+                    members = existing.members + userId
+                )
+                dao.insert(updated)
+            }
     }
 }

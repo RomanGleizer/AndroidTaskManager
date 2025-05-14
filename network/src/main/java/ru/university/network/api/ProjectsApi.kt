@@ -5,20 +5,24 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import ru.university.network.model.ProjectDto
+import ru.university.network.model.CreateProjectRequestDto
+import ru.university.network.model.AddMemberRequestDto
 
 interface ProjectsApi {
-    @GET("/projects")
+    @GET("projects")
     suspend fun getAll(): List<ProjectDto>
 
-    @GET("/projects/{id}")
+    @GET("projects/{id}")
     suspend fun getById(@Path("id") id: String): ProjectDto
 
-    @POST("/projects")
-    suspend fun create(@Body project: ProjectDto): ProjectDto
+    @POST("projects")
+    suspend fun create(
+        @Body request: CreateProjectRequestDto
+    ): ProjectDto
 
-    @POST("/projects/{id}/members/{userId}")
+    @POST("projects/{id}/members")
     suspend fun addMember(
         @Path("id") projectId: String,
-        @Path("userId") userId: String
+        @Body request: AddMemberRequestDto
     )
 }

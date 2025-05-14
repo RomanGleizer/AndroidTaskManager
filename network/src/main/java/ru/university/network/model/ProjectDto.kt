@@ -9,7 +9,8 @@ data class ProjectDto(
     val id: String,
     val title: String,
     val description: String? = null,
-    @SerialName("owner_id") val ownerId: String,
-    val members: List<String>,
-    @SerialName("created_at") val createdAt: LocalDateTime
+    @SerialName("ownerId") val ownerId: String,
+    @SerialName("memberIds")
+    val members: List<String>? = null,
+    @SerialName("createdAt") val createdAt: String
 )
