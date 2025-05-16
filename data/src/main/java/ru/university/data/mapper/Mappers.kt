@@ -14,10 +14,10 @@ import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 
 fun ProjectDto.toEntity(): ProjectEntity {
-    val createdAtParsed = try {
+    val createdAtParsed = runCatching {
         Instant.parse(createdAt)
             .toLocalDateTime(TimeZone.currentSystemDefault())
-    } catch (_: Exception) {
+    }.getOrElse {
         LocalDateTime.parse(createdAt)
     }
 
@@ -26,7 +26,7 @@ fun ProjectDto.toEntity(): ProjectEntity {
         title      = title,
         description= description,
         ownerId    = ownerId,
-        members    = members.orEmpty(),
+        members    = members,
         createdAt  = createdAtParsed
     )
 }

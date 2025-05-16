@@ -56,7 +56,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = viewModel::onPasswordChange,
-                label = { Text("Password") },
+                label = { Text("Пароль") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation()
             )
@@ -65,10 +65,10 @@ fun LoginScreen(
                 onClick = viewModel::onLoginClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                Text("Войти")
             }
             TextButton(onClick = viewModel::onSignUpClick) {
-                Text("Sign Up")
+                Text("Регистрация")
             }
             uiState.error?.let { errorMsg ->
                 Text(

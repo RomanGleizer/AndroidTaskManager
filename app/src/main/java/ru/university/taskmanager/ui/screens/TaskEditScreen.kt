@@ -35,7 +35,7 @@ fun TaskEditScreen(
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) { viewModel.initialize(taskId, projectId) }
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (taskId == null) "Create Task" else "Edit Task") }) }
+        topBar = { TopAppBar(title = { Text(if (taskId == null) "Добавить задачу" else "Изменить задачу") }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -46,21 +46,28 @@ fun TaskEditScreen(
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = viewModel::onTitleChange,
-                label = { Text("Title") },
+                label = { Text("Заголовок") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = uiState.description,
                 onValueChange = viewModel::onDescriptionChange,
-                label = { Text("Description") },
+                label = { Text("Описание") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = uiState.assignedTo,
+                onValueChange = viewModel::onAssignToChange,
+                label = { Text("Исполнитель (ID)") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(16.dp))
             Row {
-                Button(onClick = viewModel::onSave) { Text("Save") }
+                Button(onClick = viewModel::onSave) { Text("Сохранить") }
                 Spacer(Modifier.width(8.dp))
-                OutlinedButton(onClick = onCancel) { Text("Cancel") }
+                OutlinedButton(onClick = onCancel) { Text("Отмена") }
             }
         }
     }

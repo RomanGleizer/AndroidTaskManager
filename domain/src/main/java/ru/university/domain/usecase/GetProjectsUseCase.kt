@@ -7,5 +7,6 @@ import javax.inject.Inject
 class GetProjectsUseCase @Inject constructor(
     private val repository: ProjectRepository
 ) {
-    suspend operator fun invoke(): List<Project> = repository.getAllProjects()
+    suspend operator fun invoke(): List<Project> =
+        repository.getAllProjects()
 }

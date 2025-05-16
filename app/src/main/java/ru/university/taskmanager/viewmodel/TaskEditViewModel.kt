@@ -46,25 +46,29 @@ class TaskEditViewModel @Inject constructor(
     fun onSave() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
+
+            val state = _uiState.value
+            val taskId = state.taskId
+
             try {
-                if (_uiState.value.taskId == null) {
-                    val javaDueDate = _uiState.value.dueDate?.toJavaLocalDateTime()
+                if (taskId.isNullOrBlank()) {
+                    val javaDueDate = state.dueDate?.toJavaLocalDateTime()
                     createTaskUseCase(
-                        projectId = _uiState.value.projectId,
-                        title = _uiState.value.title,
-                        description = _uiState.value.description,
-                        assignedTo = _uiState.value.assignedTo,
-                        dueDate = javaDueDate
+                        projectId   = state.projectId,
+                        title       = state.title,
+                        description = state.description,
+                        assignedTo  = state.assignedTo,
+                        dueDate     = javaDueDate
                     )
                 } else {
                     updateTaskStatusUseCase(
-                        taskId = _uiState.value.taskId!!,
-                        status = TaskStatus.valueOf(_uiState.value.status)
+                        taskId = taskId,
+                        status = TaskStatus.valueOf(state.status)
                     )
                 }
                 _events.emit(TaskEditUiEvent.NavigateBack)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
+                _uiState.value = state.copy(isLoading = false, error = e.message)
             }
         }
     }

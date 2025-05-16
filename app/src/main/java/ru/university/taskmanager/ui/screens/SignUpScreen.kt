@@ -39,7 +39,7 @@ fun SignUpScreen(
         OutlinedTextField(
             value = uiState.name,
             onValueChange = viewModel::onNameChange,
-            label = { Text("Name") },
+            label = { Text("Имя") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -53,7 +53,7 @@ fun SignUpScreen(
         OutlinedTextField(
             value = uiState.password,
             onValueChange = viewModel::onPasswordChange,
-            label = { Text("Password") },
+            label = { Text("Пароль") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation()
         )
@@ -62,10 +62,10 @@ fun SignUpScreen(
             onClick = viewModel::onSignUpClick,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Sign Up")
+            Text("Зарегистрироваться")
         }
         TextButton(onClick = viewModel::onLoginClick) {
-            Text("Back to Login")
+            Text("Назад")
         }
         uiState.error?.let { errorMsg ->
             Text(text = errorMsg, color = MaterialTheme.colorScheme.error)

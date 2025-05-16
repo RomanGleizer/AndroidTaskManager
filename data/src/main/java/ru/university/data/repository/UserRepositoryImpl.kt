@@ -14,9 +14,13 @@ class UserRepositoryImpl @Inject constructor(
     private val prefs: UserPreferencesDataStore
 ) : UserRepository {
 
-    override suspend fun getCurrentUser(): User? {
-        val token = prefs.authTokenFlow.first() ?: return null
-        return null
+    override suspend fun getCurrentUser(): User {
+        val dto = api.getProfile()
+        return User(
+            id    = dto.id,
+            name  = dto.name,
+            email = dto.email
+        )
     }
 
     override suspend fun signIn(email: String, password: String): User {

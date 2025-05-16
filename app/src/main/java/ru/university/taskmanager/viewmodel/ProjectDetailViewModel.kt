@@ -9,13 +9,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import ru.university.domain.model.Project
 import ru.university.domain.model.Task
 import ru.university.domain.usecase.AddMemberUseCase
+import ru.university.domain.usecase.GetProjectUseCase
 import ru.university.domain.usecase.GetTasksUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class ProjectDetailViewModel @Inject constructor(
+    private val getProjectUseCase: GetProjectUseCase,
     private val getTasksUseCase: GetTasksUseCase,
     private val addMemberUseCase: AddMemberUseCase
 ) : ViewModel() {
@@ -50,20 +53,38 @@ class ProjectDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 addMemberUseCase(projectId, userId)
-            } catch (e: Exception) {
+                loadAll(projectId)
+            } catch (_: Exception) {
             }
         }
     }
 
+    fun loadAll(projectId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                val project = getProjectUseCase(projectId)
+                val tasks = getTasksUseCase(projectId)
+                _uiState.value = ProjectDetailUiState(
+                    project   = project,
+                    tasks     = tasks,
+                    isLoading = false
+                )
+            } catch (e: Exception) {
+                _uiState.value = ProjectDetailUiState(error = e.message)
+            }
+        }
+    }
 
     private val _events = MutableSharedFlow<ProjectDetailUiEvent>()
     val events: SharedFlow<ProjectDetailUiEvent> = _events
 }
 
 data class ProjectDetailUiState(
-    val tasks: List<Task> = emptyList(),
+    val project: Project? = null,
+    val tasks:   List<Task> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error:     String? = null
 )
 
 sealed class ProjectDetailUiEvent {

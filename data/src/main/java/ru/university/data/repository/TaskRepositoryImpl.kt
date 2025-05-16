@@ -6,13 +6,14 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
 import ru.university.data.dao.TaskDao
 import ru.university.data.mapper.toDomain
-import ru.university.data.mapper.toDto
 import ru.university.data.mapper.toEntity
 import ru.university.data.model.TaskEntity
 import ru.university.domain.model.Task
 import ru.university.domain.model.TaskStatus
 import ru.university.domain.repository.TaskRepository
 import ru.university.network.api.TasksApi
+import ru.university.network.model.CreateTaskRequestDto
+import ru.university.network.model.UpdateStatusRequestDto
 import java.time.LocalDateTime as JLocalDateTime
 import java.util.UUID
 import javax.inject.Inject
@@ -21,6 +22,7 @@ class TaskRepositoryImpl @Inject constructor(
     private val dao: TaskDao,
     private val api: TasksApi
 ) : TaskRepository {
+
     override suspend fun getTasksForProject(projectId: String): List<Task> {
         val remote = api.getForProject(projectId).map { it.toEntity() }
         remote.forEach { dao.insert(it) }
@@ -28,9 +30,16 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getTaskById(id: String): Task? {
-        val local = dao.getById(id)
-        return local?.toDomain()
-            ?: api.getById(id).toEntity().also { dao.insert(it) }.toDomain()
+        dao.getById(id)?.let { return it.toDomain() }
+
+        val all = dao.getAll()
+        val found = all.find { entity -> entity.id == id }
+            ?: return null
+
+        val dto = api.getById(found.projectId, id)
+        val entity = dto.toEntity()
+        dao.insert(entity)
+        return entity.toDomain()
     }
 
     override suspend fun createTask(
@@ -40,27 +49,45 @@ class TaskRepositoryImpl @Inject constructor(
         assignedTo: String,
         dueDate: JLocalDateTime?
     ): Task {
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        val dueK: kotlinx.datetime.LocalDateTime? = dueDate?.toKotlinLocalDateTime()
+        val now  = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val dueK = dueDate?.toKotlinLocalDateTime()
 
         val newEntity = TaskEntity(
-            id = UUID.randomUUID().toString(),
-            projectId = projectId,
-            title = title,
-            description = description,
+            id         = UUID.randomUUID().toString(),
+            projectId  = projectId,
+            title      = title,
+            description= description,
             assignedTo = assignedTo,
-            status = TaskStatus.TODO.name,
-            createdAt = now,
-            dueDate = dueK
+            status     = TaskStatus.TODO.name,
+            createdAt  = now,
+            dueDate    = dueK
         )
-        val createdDto = api.create(projectId, newEntity.toDto())
+        dao.insert(newEntity)
+
+        val request = CreateTaskRequestDto(
+            title        = title,
+            description  = description,
+            assignedToId = assignedTo,
+            dueDate      = dueK?.toString()
+        )
+        val createdDto = api.create(projectId, request)
+
         val entity = createdDto.toEntity()
         dao.insert(entity)
         return entity.toDomain()
     }
 
     override suspend fun updateTaskStatus(taskId: String, status: TaskStatus): Task {
-        val updatedDto = api.updateStatus(taskId, mapOf("status" to status.name))
+        val existing = dao.getById(taskId)
+            ?: throw IllegalStateException("Task $taskId not found locally")
+        val projectId = existing.projectId
+
+        val updatedDto = api.updateStatus(
+            projectId,
+            taskId,
+            UpdateStatusRequestDto(status.name)
+        )
+
         val entity = updatedDto.toEntity()
         dao.insert(entity)
         return entity.toDomain()

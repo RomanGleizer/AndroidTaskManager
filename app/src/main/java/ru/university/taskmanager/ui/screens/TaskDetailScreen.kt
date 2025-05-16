@@ -1,7 +1,9 @@
 package ru.university.taskmanager.ui.screens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -33,18 +35,18 @@ fun TaskDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Task Details") },
+                title = { Text("Задача") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Назад"
                         )
                     }
                 }
             )
         },
-        floatingActionButton = { FloatingActionButton(onClick = { onEdit(taskId) }) { Text("Edit") } }
+        floatingActionButton = { FloatingActionButton(onClick = { onEdit(taskId) }) { Text("Изменить") } }
     ) { paddingValues ->
         uiState.task?.let { task ->
             Column(
@@ -53,9 +55,11 @@ fun TaskDetailScreen(
                     .padding(paddingValues)
                     .padding(16.dp)
             ) {
-                Text(text = "Title: ${task.title}")
-                Text(text = "Description: ${task.description ?: ""}")
-                Text(text = "Status: ${task.status}")
+                Text(text = "Название: ${task.title}")
+                Text(text = "Описание: ${task.description ?: ""}")
+                Spacer(Modifier.height(4.dp))
+                Text(text = "Исполнитель: ${task.assignedTo}")
+                Text(text = "Статус: ${task.status}")
             }
         }
     }
