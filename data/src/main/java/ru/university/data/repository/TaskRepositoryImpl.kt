@@ -14,6 +14,7 @@ import ru.university.domain.repository.TaskRepository
 import ru.university.network.api.TasksApi
 import ru.university.network.model.CreateTaskDto
 import ru.university.network.model.UpdateStatusDto
+import ru.university.network.model.UpdateTaskDto
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -45,7 +46,7 @@ class TaskRepositoryImpl @Inject constructor(
                 title = dto.title,
                 description = dto.description,
                 status = TaskStatus.valueOf(dto.status),
-                createdAt = dto.createdAt.toLocalDateTimeSafe() ?: LocalDateTime(1970,1,1,0,0),
+                createdAt = dto.createdAt.toLocalDateTimeSafe() ?: LocalDateTime(1970, 1, 1, 0, 0),
                 dueDate = dto.dueDate?.toLocalDateTimeSafe(),
                 assignedTo = dto.assignedToId,
                 assignedToName = dto.assignedToName
@@ -95,4 +96,25 @@ class TaskRepositoryImpl @Inject constructor(
         )
         dao.insert(updatedDto.toEntity().copy(lastUpdated = System.currentTimeMillis()))
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun updateTask(
+        projectId: String,
+        taskId: String,
+        title: String,
+        description: String?,
+        assignedTo: String,
+        dueDate: java.time.LocalDateTime?,
+        status: TaskStatus
+    ) {
+        val dueDateString = dueDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+
+        val updatedDto = api.updateTask(
+            projectId,
+            taskId,
+            UpdateTaskDto(title, description, assignedTo, dueDateString, status.name)
+        )
+        dao.insert(updatedDto.toEntity().copy(lastUpdated = System.currentTimeMillis()))
+    }
+
 }

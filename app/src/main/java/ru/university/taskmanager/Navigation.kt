@@ -107,8 +107,8 @@ fun SetupNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                 projectId = projectId,
                 taskId = taskId,
                 viewModel = vm,
-                onEdit = { projId ->
-                    navController.navigate(Screen.taskEditRoute(taskId, projId))
+                onEdit = {
+                    navController.navigate(Screen.taskEditRoute(taskId, projectId))
                 },
                 onBack = { navController.popBackStack() }
             )
@@ -152,8 +152,7 @@ fun SetupNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                 taskId = taskId,
                 projectId = projectId,
                 viewModel = vm,
-                onSave = { navController.popBackStack() },
-                onCancel = { navController.popBackStack() }
+                navController = navController
             )
         }
     }

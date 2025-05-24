@@ -1,6 +1,7 @@
 package ru.university.domain.repository
 
 import ru.university.domain.model.Task
+import ru.university.domain.model.TaskStatus
 import java.time.LocalDateTime
 
 interface TaskRepository {
@@ -15,4 +16,14 @@ interface TaskRepository {
     )
 
     suspend fun updateTaskStatus(taskId: String, status: ru.university.domain.model.TaskStatus)
+
+    suspend fun updateTask(
+        projectId: String,
+        taskId: String,
+        title: String,
+        description: String?,
+        assignedTo: String,
+        dueDate: java.time.LocalDateTime?,
+        status: TaskStatus
+    )
 }

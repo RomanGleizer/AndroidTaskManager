@@ -20,6 +20,7 @@ class TaskDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TaskDetailUiState())
     val uiState: StateFlow<TaskDetailUiState> = _uiState.asStateFlow()
 
+
     fun loadTask(projectId: String, taskId: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -32,7 +33,9 @@ class TaskDetailViewModel @Inject constructor(
         }
     }
 
-    fun onChangeStatus(projectId: String, taskId: String, status: TaskStatus) {
+    fun getAvailableStatuses(): List<TaskStatus> = TaskStatus.entries
+
+    fun updateStatus(projectId: String, taskId: String, status: TaskStatus) {
         viewModelScope.launch {
             updateTaskStatusUseCase(taskId, status)
             loadTask(projectId, taskId)

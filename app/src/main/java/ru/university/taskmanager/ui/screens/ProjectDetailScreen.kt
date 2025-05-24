@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -32,31 +32,39 @@ fun ProjectDetailScreen(
         viewModel.loadProjectUsers(projectId)
     }
 
+    val backgroundColor = Color(0xFF1E1E1E)
+    val accentYellow = Color(0xFFFFC107)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(uiState.project?.title ?: "") },
+                title = { Text(uiState.project?.title ?: "", color = accentYellow) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Назад",
+                            tint = accentYellow
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFEB3B),
-                    titleContentColor = Color.Black,
-                    navigationIconContentColor = Color.Black
+                    containerColor = backgroundColor,
+                    titleContentColor = accentYellow,
+                    navigationIconContentColor = accentYellow
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddTask,
-                containerColor = Color(0xFFFFEB3B),
+                containerColor = accentYellow,
                 contentColor = Color.Black
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Добавить задачу")
             }
         },
+        containerColor = backgroundColor,
         content = { padding ->
             Column(
                 modifier = modifier
@@ -68,43 +76,73 @@ fun ProjectDetailScreen(
                     Text(
                         text = project.description ?: "Описание отсутствует",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.DarkGray
+                        color = accentYellow,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Text("Участники", style = MaterialTheme.typography.titleMedium)
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                    Text(
+                        "Участники",
+                        style = MaterialTheme.typography.titleMedium.copy(color = accentYellow)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF867777)),
+                        shape = MaterialTheme.shapes.medium,
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        LazyColumn {
+                        LazyColumn(modifier = Modifier.heightIn(max = 150.dp)) {
                             items(users) { user ->
-                                Text(
-                                    text = "${user.name} (Invite Id: ${user.inviteId})",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(vertical = 4.dp)
+                                ListItem(
+                                    headlineContent = {
+                                        Text(
+                                            text = user.name,
+                                            color = Color(0xFF151010),
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            text = "Invite Id: ${user.inviteId ?: "нет"}",
+                                            color = Color(0xFF181313),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                    Text("Задачи", style = MaterialTheme.typography.titleMedium)
-                    Box(
-                        modifier = Modifier
-                            .weight(2f)
-                            .fillMaxWidth()
+                    Text(
+                        "Задачи",
+                        style = MaterialTheme.typography.titleMedium.copy(color = accentYellow)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A)),
+                        shape = MaterialTheme.shapes.medium,
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        LazyColumn {
+                        LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
                             items(uiState.tasks) { task ->
                                 ListItem(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable { onTaskClick(task.id) },
-                                    headlineContent = { Text(task.title) },
-                                    supportingContent = { Text(task.status.name) }
+                                    headlineContent = {
+                                        Text(task.title, color = accentYellow)
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            task.status.name,
+                                            color = accentYellow.copy(alpha = 0.8f)
+                                        )
+                                    }
                                 )
                             }
                         }
@@ -112,6 +150,7 @@ fun ProjectDetailScreen(
                 }
 
                 uiState.error?.let { errorMsg ->
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(text = "Ошибка: $errorMsg", color = MaterialTheme.colorScheme.error)
                 }
             }

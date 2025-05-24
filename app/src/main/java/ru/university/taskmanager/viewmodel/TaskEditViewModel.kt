@@ -12,19 +12,41 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaLocalDateTime
 import ru.university.domain.model.TaskStatus
 import ru.university.domain.usecase.CreateTaskUseCase
-import ru.university.domain.usecase.UpdateTaskStatusUseCase
+import ru.university.domain.usecase.GetTaskByIdUseCase
+import ru.university.domain.usecase.UpdateTaskUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class TaskEditViewModel @Inject constructor(
     private val createTaskUseCase: CreateTaskUseCase,
-    private val updateTaskStatusUseCase: UpdateTaskStatusUseCase
+    private val getTaskByIdUseCase: GetTaskByIdUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TaskEditUiState())
     val uiState: StateFlow<TaskEditUiState> = _uiState.asStateFlow()
 
     fun initialize(taskId: String?, projectId: String) {
-        _uiState.value = TaskEditUiState(projectId = projectId, taskId = taskId)
+        viewModelScope.launch {
+            if (!taskId.isNullOrBlank()) {
+                try {
+                    val task = getTaskByIdUseCase(projectId, taskId)
+                    _uiState.value = TaskEditUiState(
+                        projectId = projectId,
+                        taskId = taskId,
+                        title = task.title,
+                        description = task.description ?: "",
+                        assignedToId = task.assignedTo,
+                        dueDate = task.dueDate?.let { kotlinx.datetime.LocalDateTime.parse(it.toString()) },
+                        status = task.status.name
+                    )
+                } catch (e: Exception) {
+                    _uiState.value =
+                        TaskEditUiState(projectId = projectId, taskId = taskId, error = e.message)
+                }
+            } else {
+                _uiState.value = TaskEditUiState(projectId = projectId, taskId = null)
+            }
+        }
     }
 
     fun onTitleChange(title: String) {
@@ -36,7 +58,7 @@ class TaskEditViewModel @Inject constructor(
     }
 
     fun onAssignToChange(userId: String) {
-        _uiState.value = _uiState.value.copy(assignedTo = userId)
+        _uiState.value = _uiState.value.copy(assignedToId = userId)
     }
 
     fun onDueDateChange(dueDate: kotlinx.datetime.LocalDateTime?) {
@@ -46,23 +68,26 @@ class TaskEditViewModel @Inject constructor(
     fun onSave() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-
             val state = _uiState.value
-            val taskId = state.taskId
-
             try {
-                if (taskId.isNullOrBlank()) {
+                if (state.taskId.isNullOrBlank()) {
                     val javaDueDate = state.dueDate?.toJavaLocalDateTime()
                     createTaskUseCase(
-                        projectId   = state.projectId,
-                        title       = state.title,
+                        projectId = state.projectId,
+                        title = state.title,
                         description = state.description,
-                        assignedTo  = state.assignedTo,
-                        dueDate     = javaDueDate
+                        assignedTo = state.assignedToId,
+                        dueDate = javaDueDate
                     )
                 } else {
-                    updateTaskStatusUseCase(
-                        taskId = taskId,
+                    val javaDueDate = state.dueDate?.toJavaLocalDateTime()
+                    updateTaskUseCase(
+                        projectId = state.projectId,
+                        taskId = state.taskId,
+                        title = state.title,
+                        description = state.description,
+                        assignedTo = state.assignedToId,
+                        dueDate = javaDueDate,
                         status = TaskStatus.valueOf(state.status)
                     )
                 }
@@ -82,7 +107,7 @@ data class TaskEditUiState(
     val taskId: String? = null,
     val title: String = "",
     val description: String = "",
-    val assignedTo: String = "",
+    val assignedToId: String = "",
     val dueDate: kotlinx.datetime.LocalDateTime? = null,
     val status: String = TaskStatus.TODO.name,
     val isLoading: Boolean = false,

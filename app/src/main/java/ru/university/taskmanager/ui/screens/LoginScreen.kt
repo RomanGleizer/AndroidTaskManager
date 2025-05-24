@@ -1,17 +1,11 @@
 package ru.university.taskmanager.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import ru.university.taskmanager.viewmodel.LoginUiEvent
@@ -24,7 +18,6 @@ fun LoginScreen(
     onSignUpClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -35,9 +28,11 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
+    val backgroundColor = Color(0xFF1E1E1E)
+    val accentYellow = Color(0xFFFFC107)
+    val textColor = Color(0xFFE0E0E0)
+
+    Scaffold(containerColor = backgroundColor) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -49,32 +44,34 @@ fun LoginScreen(
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Email", color = accentYellow) },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = LocalTextStyle.current.copy(color = textColor)
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = viewModel::onPasswordChange,
-                label = { Text("Пароль") },
+                label = { Text("Пароль", color = accentYellow) },
+                visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation()
+                textStyle = LocalTextStyle.current.copy(color = textColor)
             )
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = viewModel::onLoginClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = accentYellow)
             ) {
-                Text("Войти")
+                Text("Войти", color = backgroundColor)
             }
+            Spacer(Modifier.height(8.dp))
             TextButton(onClick = viewModel::onSignUpClick) {
-                Text("Регистрация")
+                Text("Регистрация", color = accentYellow)
             }
             uiState.error?.let { errorMsg ->
-                Text(
-                    text = errorMsg,
-                    color = MaterialTheme.colorScheme.error
-                )
+                Spacer(Modifier.height(16.dp))
+                Text(text = errorMsg, color = MaterialTheme.colorScheme.error)
             }
         }
     }

@@ -16,10 +16,12 @@ import ru.university.domain.usecase.GetTasksUseCase
 import ru.university.domain.usecase.GetProfileUseCase
 import ru.university.domain.usecase.GetProjectUsersUseCase
 import ru.university.domain.usecase.GetProjectsUseCase
+import ru.university.domain.usecase.GetTaskByIdUseCase
 import ru.university.domain.usecase.SignInUseCase
 import ru.university.domain.usecase.SignOutUseCase
 import ru.university.domain.usecase.SignUpUseCase
 import ru.university.domain.usecase.UpdateTaskStatusUseCase
+import ru.university.domain.usecase.UpdateTaskUseCase
 import javax.inject.Singleton
 
 @Module
@@ -115,4 +117,16 @@ object UseCaseModule {
     fun provideGetProjectUsersUseCase(
         projectRepository: ProjectRepository
     ): GetProjectUsersUseCase = GetProjectUsersUseCase(projectRepository)
+
+    @Provides
+    @Singleton
+    fun provideGetTaskByIdUseCase(
+        taskRepository: TaskRepository
+    ): GetTaskByIdUseCase = GetTaskByIdUseCase(taskRepository)
+
+    @Provides
+    @Singleton
+    fun provideUpdateTaskUseCase(
+        taskRepository: TaskRepository
+    ): UpdateTaskUseCase = UpdateTaskUseCase(taskRepository)
 }

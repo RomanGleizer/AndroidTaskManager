@@ -1,18 +1,20 @@
 package ru.university.taskmanager.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import ru.university.taskmanager.viewmodel.CreateTaskViewModel
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import ru.university.taskmanager.viewmodel.CreateTaskViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -31,7 +33,6 @@ fun CreateTaskScreen(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var assignedTo by remember { mutableStateOf("") }
-
     var dueDate by remember { mutableStateOf<LocalDateTime?>(null) }
 
     val context = LocalContext.current
@@ -71,22 +72,37 @@ fun CreateTaskScreen(
         ).show()
     }
 
+    val backgroundColor = Color(0xFF1E1E1E)
+    val accentYellow = Color(0xFFFFC107)
+    val textColor = Color(0xFFE0E0E0)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Создать задачу") },
+                title = { Text("Создать задачу", color = accentYellow) },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Отмена")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Отмена",
+                            tint = accentYellow
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor,
+                    titleContentColor = accentYellow,
+                    navigationIconContentColor = accentYellow
+                )
             )
         },
+        containerColor = backgroundColor,
         modifier = modifier
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(backgroundColor)
                 .padding(padding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top
@@ -94,27 +110,37 @@ fun CreateTaskScreen(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Название задачи") },
+                label = { Text("Название задачи", color = accentYellow) },
+                textStyle = LocalTextStyle.current.copy(color = textColor),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Описание") },
+                label = { Text("Описание", color = accentYellow) },
+                textStyle = LocalTextStyle.current.copy(color = textColor),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = assignedTo,
                 onValueChange = { assignedTo = it },
-                label = { Text("Ответственный") },
+                label = { Text("Ответственный", color = accentYellow) },
+                textStyle = LocalTextStyle.current.copy(color = textColor),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
 
-            Button(onClick = { showDatePicker = true }) {
-                Text(text = dueDate?.toString() ?: "Выбрать срок выполнения")
+            Button(
+                onClick = { showDatePicker = true },
+                colors = ButtonDefaults.buttonColors(containerColor = accentYellow),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = dueDate?.toString() ?: "Выбрать срок выполнения",
+                    color = backgroundColor
+                )
             }
             Spacer(Modifier.height(16.dp))
             Button(
@@ -128,9 +154,10 @@ fun CreateTaskScreen(
                     )
                     onTaskCreated()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = accentYellow)
             ) {
-                Text("Создать")
+                Text("Создать", color = backgroundColor)
             }
         }
     }

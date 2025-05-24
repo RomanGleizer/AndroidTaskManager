@@ -19,4 +19,11 @@ interface TasksApi {
         @Path("taskId") taskId: String,
         @Body dto: UpdateStatusDto
     ): TaskDto
+
+    @PATCH("projects/{projectId}/tasks/{taskId}")
+    suspend fun updateTask(
+        @Path("projectId") projectId: String,
+        @Path("taskId") taskId: String,
+        @Body dto: UpdateTaskDto
+    ): TaskDto
 }

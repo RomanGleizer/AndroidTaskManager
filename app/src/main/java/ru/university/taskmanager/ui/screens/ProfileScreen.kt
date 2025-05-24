@@ -4,9 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -27,21 +27,31 @@ fun ProfileScreen(
     val user = userState.value
     val clipboard = LocalClipboardManager.current
 
+    val backgroundColor = Color(0xFF1E1E1E)
+    val accentYellow = Color(0xFFFFC107)
+    val textColor = Color(0xFFE0E0E0)
+    val clickableBlue = Color(0xFF1976D2)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Профиль") },
+                title = { Text("Профиль", color = accentYellow) },
                 navigationIcon = {
-                    IconButton(onClick = { onBack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Назад",
+                            tint = accentYellow
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = Color(0xFFFFEB3B),
-                    titleContentColor = Color.Black
+                    containerColor = backgroundColor,
+                    titleContentColor = accentYellow
                 )
             )
-        }
+        },
+        containerColor = backgroundColor
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -50,7 +60,10 @@ fun ProfileScreen(
                 .padding(24.dp)
         ) {
             if (user == null) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = accentYellow
+                )
             } else {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -62,13 +75,13 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(96.dp)
-                            .background(Color(0xFFFFEB3B), shape = CircleShape),
+                            .background(accentYellow, shape = CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = initials,
                             style = MaterialTheme.typography.headlineLarge,
-                            color = Color.Black
+                            color = backgroundColor
                         )
                     }
 
@@ -76,31 +89,44 @@ fun ProfileScreen(
 
                     InfoRow(
                         label = "Id для приглашения в проект:",
-                        value = user.inviteId ?: "Не указано"
-                    ) {
-                        clipboard.setText(
-                            androidx.compose.ui.text.AnnotatedString(
-                                user.inviteId ?: ""
+                        value = user.inviteId ?: "Не указано",
+                        labelColor = accentYellow,
+                        valueColor = accentYellow,
+                        onValueClick = {
+                            clipboard.setText(
+                                androidx.compose.ui.text.AnnotatedString(
+                                    user.inviteId ?: ""
+                                )
                             )
-                        )
-                    }
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    InfoRow(label = "Имя:", value = user.name)
+                    InfoRow(
+                        label = "Имя:",
+                        value = user.name,
+                        labelColor = accentYellow,
+                        valueColor = accentYellow
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    InfoRow(label = "Email:", value = user.email)
+                    InfoRow(
+                        label = "Email:",
+                        value = user.email,
+                        labelColor = accentYellow,
+                        valueColor = accentYellow
+                    )
 
                     Spacer(modifier = Modifier.height(40.dp))
 
                     Button(
                         onClick = { viewModel.logout() },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEB3B))
+                        colors = ButtonDefaults.buttonColors(containerColor = accentYellow)
                     ) {
-                        Text("Выйти из аккаунта", color = Color.Black)
+                        Text("Выйти из аккаунта", color = backgroundColor)
                     }
                 }
             }
@@ -109,24 +135,27 @@ fun ProfileScreen(
 }
 
 @Composable
-fun InfoRow(label: String, value: String, onValueClick: (() -> Unit)? = null) {
+fun InfoRow(
+    label: String,
+    value: String,
+    labelColor: Color,
+    valueColor: Color,
+    onValueClick: (() -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .then(
-                if (onValueClick != null) Modifier.clickable { onValueClick() }
-                else Modifier
-            ),
+            .then(if (onValueClick != null) Modifier.clickable { onValueClick() } else Modifier),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = if (onValueClick != null) Color(0xFF1976D2) else Color.Black
+            color = valueColor
         )
     }
 }
