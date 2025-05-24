@@ -1,9 +1,11 @@
 package ru.university.data.mapper
 
+import ru.university.data.db.Converters.parseToLocalDateTime
+import ru.university.data.db.Converters.parseToLocalDateTimeOrDefault
+import ru.university.data.db.Converters.parseToLocalDateTimeOrNull
 import ru.university.domain.model.*
 import ru.university.network.model.*
 import ru.university.data.model.*
-import kotlinx.datetime.LocalDateTime
 
 fun UserDto.toDomain(): User = User(id, name, email, inviteId)
 
@@ -13,7 +15,7 @@ fun ProjectDto.toDomain(): Project = Project(
     description = description,
     ownerId = ownerId,
     members = members,
-    createdAt = LocalDateTime.parse(createdAt)
+    createdAt = createdAt.parseToLocalDateTime()
 )
 
 fun ProjectDto.toEntity(): ProjectEntity = ProjectEntity(
@@ -22,7 +24,7 @@ fun ProjectDto.toEntity(): ProjectEntity = ProjectEntity(
     description = description,
     ownerId = ownerId,
     members = members ?: emptyList(),
-    createdAt = parseLocalDateTime(createdAt)
+    createdAt = createdAt.parseToLocalDateTime()
 )
 
 fun ProjectEntity.toDomain(): Project = Project(
@@ -35,13 +37,13 @@ fun ProjectEntity.toDomain(): Project = Project(
 )
 
 fun TaskDto.toDomain(): Task = Task(
-    id = id,
-    projectId = projectId,
-    title = title,
-    description = description,
-    status = TaskStatus.valueOf(status),
-    createdAt = LocalDateTime.parse(createdAt),
-    dueDate = dueDate?.let { LocalDateTime.parse(it) },
+    id = this.id,
+    projectId = this.projectId,
+    title = this.title,
+    description = this.description,
+    status = TaskStatus.valueOf(this.status),
+    createdAt = createdAt.parseToLocalDateTimeOrDefault(),
+    dueDate = dueDate?.parseToLocalDateTimeOrNull(),
     assignedTo = assignedToId,
     assignedToName = assignedToName
 )
@@ -53,8 +55,8 @@ fun TaskDto.toEntity(): TaskEntity = TaskEntity(
     description = description,
     assignedTo = assignedToId,
     status = status,
-    createdAt = LocalDateTime.parse(createdAt),
-    dueDate = dueDate?.let { LocalDateTime.parse(it) }
+    createdAt = createdAt.parseToLocalDateTimeOrDefault(),
+    dueDate = dueDate?.parseToLocalDateTimeOrNull()
 )
 
 fun TaskEntity.toDomain(): Task = Task(
@@ -69,6 +71,18 @@ fun TaskEntity.toDomain(): Task = Task(
     assignedToName = ""
 )
 
+fun TaskEntity.toDto(): TaskDto = TaskDto(
+    id = id,
+    projectId = projectId,
+    title = title,
+    description = description,
+    status = status,
+    createdAt = createdAt.toString(),
+    dueDate = dueDate?.toString(),
+    assignedToId = assignedTo,
+    assignedToName = ""
+)
+
 fun Project.toDto(): CreateProjectDto = CreateProjectDto(title, description)
 
 fun Task.toDto(): CreateTaskDto = CreateTaskDto(
@@ -79,8 +93,3 @@ fun Task.toDto(): CreateTaskDto = CreateTaskDto(
 )
 
 fun TaskStatus.toDto(): String = name
-
-fun parseLocalDateTime(input: String): LocalDateTime {
-    val cleanInput = if (input.endsWith("Z")) input.removeSuffix("Z") else input
-    return LocalDateTime.parse(cleanInput)
-}

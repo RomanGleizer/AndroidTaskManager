@@ -47,6 +47,7 @@ class ProjectDetailViewModel @Inject constructor(
                 val usersList = getProjectUsersUseCase(projectId)
                 _users.value = usersList
             } catch (e: Exception) {
+                _uiState.value = ProjectDetailUiState(error = e.message ?: "Ошибка загрузки")
             }
         }
     }

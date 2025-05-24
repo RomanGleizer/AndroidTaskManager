@@ -1,21 +1,21 @@
 package ru.university.data.repository
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.toKotlinLocalDateTime
+import android.os.Build
+import androidx.annotation.RequiresApi
+import kotlinx.datetime.LocalDateTime
 import ru.university.data.dao.TaskDao
+import ru.university.data.db.Converters.toLocalDateTimeSafe
 import ru.university.data.mapper.toDomain
+import ru.university.data.mapper.toDto
 import ru.university.data.mapper.toEntity
-import ru.university.data.model.TaskEntity
 import ru.university.domain.model.Task
 import ru.university.domain.model.TaskStatus
 import ru.university.domain.repository.TaskRepository
 import ru.university.network.api.TasksApi
 import ru.university.network.model.CreateTaskDto
 import ru.university.network.model.UpdateStatusDto
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import java.util.UUID
 
 class TaskRepositoryImpl @Inject constructor(
     private val dao: TaskDao,
@@ -36,7 +36,21 @@ class TaskRepositoryImpl @Inject constructor(
             remoteEntities.forEach { dao.insert(it) }
         }
 
-        return dao.getForProject(projectId).map { it.toDomain() }
+        return dao.getForProject(projectId).map { entity ->
+            val dto = entity.toDto()
+
+            Task(
+                id = dto.id,
+                projectId = dto.projectId,
+                title = dto.title,
+                description = dto.description,
+                status = TaskStatus.valueOf(dto.status),
+                createdAt = dto.createdAt.toLocalDateTimeSafe() ?: LocalDateTime(1970,1,1,0,0),
+                dueDate = dto.dueDate?.toLocalDateTimeSafe(),
+                assignedTo = dto.assignedToId,
+                assignedToName = dto.assignedToName
+            )
+        }
     }
 
     override suspend fun getTaskById(projectId: String, id: String): Task {
@@ -52,6 +66,7 @@ class TaskRepositoryImpl @Inject constructor(
         return entity.toDomain()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun createTask(
         projectId: String,
         title: String,
@@ -59,29 +74,12 @@ class TaskRepositoryImpl @Inject constructor(
         assignedTo: String,
         dueDate: java.time.LocalDateTime?
     ) {
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        val dueK = dueDate?.toKotlinLocalDateTime()
+        val dueDateString: String? = dueDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
-        val tempEntity = TaskEntity(
-            id = UUID.randomUUID().toString(),
-            projectId = projectId,
-            title = title,
-            description = description,
-            assignedTo = assignedTo,
-            status = TaskStatus.TODO.name,
-            createdAt = now,
-            dueDate = dueK,
-            lastUpdated = System.currentTimeMillis()
+        val createdDto = api.createTask(
+            projectId,
+            CreateTaskDto(title, description, assignedTo, dueDateString)
         )
-        dao.insert(tempEntity)
-
-        val request = CreateTaskDto(
-            title = title,
-            description = description,
-            assignedToId = assignedTo,
-            dueDate = dueK?.toString()
-        )
-        val createdDto = api.createTask(projectId, request)
         dao.insert(createdDto.toEntity().copy(lastUpdated = System.currentTimeMillis()))
     }
 

@@ -37,8 +37,12 @@ class ProjectsListViewModel @Inject constructor(
 
     fun onAddProjectClick(title: String, description: String?) {
         viewModelScope.launch {
-            createProjectUseCase(title, description)
-            loadProjects()
+            try {
+                createProjectUseCase(title, description)
+                loadProjects()
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message ?: "Ошибка создания проекта")
+            }
         }
     }
 }

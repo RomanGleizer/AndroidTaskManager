@@ -1,6 +1,7 @@
-// SetupNavGraph.kt
 package ru.university.taskmanager
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -12,6 +13,7 @@ import androidx.navigation.navArgument
 import ru.university.taskmanager.ui.screens.*
 import ru.university.taskmanager.viewmodel.*
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SetupNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
@@ -85,7 +87,7 @@ fun SetupNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                     navController.navigate(Screen.taskDetailRoute(projectId, taskId))
                 },
                 onAddTask = {
-                    // TODO: navigate to create task screen if needed
+                    navController.navigate(Screen.createTaskRoute(projectId))
                 },
                 onBack = { navController.popBackStack() }
             )
@@ -109,6 +111,22 @@ fun SetupNavGraph(navController: NavHostController, modifier: Modifier = Modifie
                     navController.navigate(Screen.taskEditRoute(taskId, projId))
                 },
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.CreateTask,
+            arguments = listOf(navArgument("projectId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val projectId = backStackEntry.arguments?.getString("projectId") ?: ""
+            val vm: CreateTaskViewModel = hiltViewModel()
+            CreateTaskScreen(
+                projectId = projectId,
+                viewModel = vm,
+                onTaskCreated = {
+                    navController.popBackStack()
+                },
+                onCancel = { navController.popBackStack() }
             )
         }
 

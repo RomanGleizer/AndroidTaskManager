@@ -58,7 +58,12 @@ fun ProjectDetailScreen(
             }
         },
         content = { padding ->
-            Column(modifier.padding(16.dp)) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+            ) {
                 uiState.project?.let { project ->
                     Text(
                         text = project.description ?: "Описание отсутствует",
@@ -68,28 +73,40 @@ fun ProjectDetailScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text("Участники", style = MaterialTheme.typography.titleMedium)
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(users) { user ->
-                            Text(
-                                text = "${user.name} (Invite Id: ${user.inviteId})",
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        LazyColumn {
+                            items(users) { user ->
+                                Text(
+                                    text = "${user.name} (Invite Id: ${user.inviteId})",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text("Задачи", style = MaterialTheme.typography.titleMedium)
-                    LazyColumn(modifier = Modifier.weight(2f)) {
-                        items(uiState.tasks) { task ->
-                            ListItem(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onTaskClick(task.id) },
-                                headlineContent = { Text(task.title) },
-                                supportingContent = { Text(task.status.name) }
-                            )
+                    Box(
+                        modifier = Modifier
+                            .weight(2f)
+                            .fillMaxWidth()
+                    ) {
+                        LazyColumn {
+                            items(uiState.tasks) { task ->
+                                ListItem(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onTaskClick(task.id) },
+                                    headlineContent = { Text(task.title) },
+                                    supportingContent = { Text(task.status.name) }
+                                )
+                            }
                         }
                     }
                 }

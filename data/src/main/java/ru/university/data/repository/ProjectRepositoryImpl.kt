@@ -15,7 +15,6 @@ import ru.university.network.api.ProjectsApi
 import ru.university.network.model.AddMemberDto
 import ru.university.network.model.CreateProjectDto
 import javax.inject.Inject
-import java.util.UUID
 
 class ProjectRepositoryImpl @Inject constructor(
     private val dao: ProjectDao,
@@ -33,10 +32,7 @@ class ProjectRepositoryImpl @Inject constructor(
             val remoteEntities = remoteDtos.map { dto ->
                 dto.toEntity().copy(lastUpdated = now)
             }
-            remoteEntities.forEach {
-                Log.d("ProjectRepository", "Inserting project id=${it.id}")
-                dao.insert(it)
-            }
+            remoteEntities.forEach { dao.insert(it) }
         }
 
         return dao.getAll().map { it.toDomain() }
@@ -51,18 +47,6 @@ class ProjectRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createProject(title: String, description: String?) {
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        val tempEntity = ProjectEntity(
-            id = UUID.randomUUID().toString(),
-            title = title,
-            description = description,
-            ownerId = "",
-            members = emptyList(),
-            createdAt = now,
-            lastUpdated = System.currentTimeMillis()
-        )
-        dao.insert(tempEntity)
-
         val createdDto = api.createProject(CreateProjectDto(title, description))
         dao.insert(createdDto.toEntity().copy(lastUpdated = System.currentTimeMillis()))
     }
@@ -80,4 +64,3 @@ class ProjectRepositoryImpl @Inject constructor(
         return usersDto.map { it.toDomain() }
     }
 }
-
