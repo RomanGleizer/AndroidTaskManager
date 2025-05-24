@@ -16,4 +16,13 @@ interface ProjectDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(project: ProjectEntity)
+
+    @Query("SELECT lastUpdated FROM projects WHERE id = :id")
+    suspend fun getLastUpdatedById(id: String): Long?
+
+    @Query("SELECT MAX(lastUpdated) FROM projects")
+    suspend fun getLastUpdated(): Long?
+
+    @Query("DELETE FROM projects")
+    suspend fun clearAll()
 }

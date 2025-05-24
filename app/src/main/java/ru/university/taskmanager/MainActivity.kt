@@ -33,11 +33,13 @@ fun TaskerApp() {
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
-            navController.navigate(Screen.ProjectsList.route) {
-                popUpTo(Screen.Login.route) { inclusive = true }
+            navController.navigate(Screen.ProjectsList) {
+                popUpTo(Screen.Login) {
+                    inclusive = true
+                }
             }
         } else {
-            navController.navigate(Screen.Login.route) {
+            navController.navigate(Screen.Login) {
                 popUpTo(0)
             }
         }
@@ -49,7 +51,7 @@ fun TaskerApp() {
                 TopAppBar(
                     title = { Text("Задачник") },
                     actions = {
-                        IconButton(onClick = { navController.navigate(Screen.Profile.route) }) {
+                        IconButton(onClick = { navController.navigate(Screen.Profile) }) {
                             Icon(
                                 imageVector = Icons.Filled.AccountCircle,
                                 contentDescription = "Профиль"
@@ -60,7 +62,7 @@ fun TaskerApp() {
             }
         }
     ) { innerPadding ->
-        TaskerNavGraph(
+        SetupNavGraph(
             navController = navController,
             modifier = Modifier.padding(innerPadding)
         )

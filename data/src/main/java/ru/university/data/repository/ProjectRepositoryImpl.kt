@@ -1,5 +1,6 @@
 package ru.university.data.repository
 
+import android.util.Log
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -8,6 +9,7 @@ import ru.university.data.mapper.toDomain
 import ru.university.data.mapper.toEntity
 import ru.university.data.model.ProjectEntity
 import ru.university.domain.model.Project
+import ru.university.domain.model.User
 import ru.university.domain.repository.ProjectRepository
 import ru.university.network.api.ProjectsApi
 import ru.university.network.model.AddMemberDto
@@ -20,17 +22,30 @@ class ProjectRepositoryImpl @Inject constructor(
     private val api: ProjectsApi
 ) : ProjectRepository {
 
+    private val cacheDurationMs = 5 * 60 * 1000L
+
     override suspend fun getProjects(): List<Project> {
-        val remoteDtos = api.getProjects()
-        val remoteEntities = remoteDtos.map { it.toEntity() }
-        remoteEntities.forEach { dao.insert(it) }
+        val now = System.currentTimeMillis()
+        val lastUpdate = dao.getLastUpdated() ?: 0L
+
+        if (now - lastUpdate > cacheDurationMs) {
+            val remoteDtos = api.getProjects()
+            val remoteEntities = remoteDtos.map { dto ->
+                dto.toEntity().copy(lastUpdated = now)
+            }
+            remoteEntities.forEach {
+                Log.d("ProjectRepository", "Inserting project id=${it.id}")
+                dao.insert(it)
+            }
+        }
+
         return dao.getAll().map { it.toDomain() }
     }
 
     override suspend fun getProjectById(id: String): Project {
         dao.getById(id)?.let { return it.toDomain() }
         val remoteDto = api.getProjectById(id)
-        val entity = remoteDto.toEntity()
+        val entity = remoteDto.toEntity().copy(lastUpdated = System.currentTimeMillis())
         dao.insert(entity)
         return entity.toDomain()
     }
@@ -43,20 +58,26 @@ class ProjectRepositoryImpl @Inject constructor(
             description = description,
             ownerId = "",
             members = emptyList(),
-            createdAt = now
+            createdAt = now,
+            lastUpdated = System.currentTimeMillis()
         )
         dao.insert(tempEntity)
 
         val createdDto = api.createProject(CreateProjectDto(title, description))
-        dao.insert(createdDto.toEntity())
+        dao.insert(createdDto.toEntity().copy(lastUpdated = System.currentTimeMillis()))
     }
 
     override suspend fun addMember(projectId: String, inviteId: String) {
         api.addMember(projectId, AddMemberDto(inviteId))
-
         dao.getById(projectId)?.let {
             val updated = it.copy(members = it.members + inviteId)
             dao.insert(updated)
         }
     }
+
+    override suspend fun getProjectUsers(projectId: String): List<User> {
+        val usersDto = api.getProjectUsers(projectId)
+        return usersDto.map { it.toDomain() }
+    }
 }
+

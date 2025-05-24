@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 interface TaskRepository {
     suspend fun getTasksForProject(projectId: String): List<Task>
-    suspend fun getTaskById(taskId: String): Task
+    suspend fun getTaskById(projectId: String, id: String): Task
     suspend fun createTask(
         projectId: String,
         title: String,
@@ -13,5 +13,6 @@ interface TaskRepository {
         assignedTo: String,
         dueDate: LocalDateTime?
     )
+
     suspend fun updateTaskStatus(taskId: String, status: ru.university.domain.model.TaskStatus)
 }

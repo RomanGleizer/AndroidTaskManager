@@ -15,4 +15,7 @@ interface ProjectsApi {
 
     @POST("projects/{id}/members")
     suspend fun addMember(@Path("id") projectId: String, @Body dto: AddMemberDto)
+
+    @GET("projects/{id}/users")
+    suspend fun getProjectUsers(@Path("id") projectId: String): List<UserDto>
 }

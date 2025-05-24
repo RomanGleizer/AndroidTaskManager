@@ -19,11 +19,15 @@ class ProjectsListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProjectsListUiState())
     val uiState: StateFlow<ProjectsListUiState> = _uiState.asStateFlow()
 
+    init {
+        loadProjects()
+    }
+
     fun loadProjects() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                val projects: List<Project> = getProjectsUseCase()
+                val projects = getProjectsUseCase()
                 _uiState.value = ProjectsListUiState(projects, false, null)
             } catch (e: Exception) {
                 _uiState.value = ProjectsListUiState(error = e.message ?: "Ошибка загрузки")

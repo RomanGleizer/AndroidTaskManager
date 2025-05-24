@@ -14,6 +14,7 @@ import ru.university.domain.usecase.GetProjectUseCase
 import ru.university.domain.usecase.GetTaskUseCase
 import ru.university.domain.usecase.GetTasksUseCase
 import ru.university.domain.usecase.GetProfileUseCase
+import ru.university.domain.usecase.GetProjectUsersUseCase
 import ru.university.domain.usecase.GetProjectsUseCase
 import ru.university.domain.usecase.SignInUseCase
 import ru.university.domain.usecase.SignOutUseCase
@@ -25,75 +26,93 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object UseCaseModule {
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideGetProjectsUseCase(
         projectRepository: ProjectRepository
     ): GetProjectsUseCase =
         GetProjectsUseCase(projectRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideCreateProjectUseCase(
         projectRepository: ProjectRepository
     ): CreateProjectUseCase =
         CreateProjectUseCase(projectRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideAddMemberUseCase(
         projectRepository: ProjectRepository
     ): AddMemberUseCase =
         AddMemberUseCase(projectRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideGetProjectUseCase(
         projectRepository: ProjectRepository
     ): GetProjectUseCase =
         GetProjectUseCase(projectRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideGetTasksUseCase(
         taskRepository: TaskRepository
     ): GetTasksUseCase =
         GetTasksUseCase(taskRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideGetTaskUseCase(
         taskRepository: TaskRepository
     ): GetTaskUseCase =
         GetTaskUseCase(taskRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideCreateTaskUseCase(
         taskRepository: TaskRepository
     ): CreateTaskUseCase =
         CreateTaskUseCase(taskRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideUpdateTaskStatusUseCase(
         taskRepository: TaskRepository
     ): UpdateTaskStatusUseCase =
         UpdateTaskStatusUseCase(taskRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideSignUpUseCase(
         userRepository: UserRepository
     ): SignUpUseCase =
         SignUpUseCase(userRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideSignInUseCase(
         userRepository: UserRepository
     ): SignInUseCase =
         SignInUseCase(userRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideSignOutUseCase(
         userRepository: UserRepository
     ): SignOutUseCase =
         SignOutUseCase(userRepository)
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideGetProfileUseCase(
         userRepository: UserRepository
     ): GetProfileUseCase =
         GetProfileUseCase(userRepository)
+
+    @Provides
+    @Singleton
+    fun provideGetProjectUsersUseCase(
+        projectRepository: ProjectRepository
+    ): GetProjectUsersUseCase = GetProjectUsersUseCase(projectRepository)
 }

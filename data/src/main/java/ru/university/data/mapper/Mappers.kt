@@ -5,7 +5,7 @@ import ru.university.network.model.*
 import ru.university.data.model.*
 import kotlinx.datetime.LocalDateTime
 
-fun UserDto.toDomain(): User = User(id, name, email)
+fun UserDto.toDomain(): User = User(id, name, email, inviteId)
 
 fun ProjectDto.toDomain(): Project = Project(
     id = id,
@@ -21,8 +21,8 @@ fun ProjectDto.toEntity(): ProjectEntity = ProjectEntity(
     title = title,
     description = description,
     ownerId = ownerId,
-    members = members,
-    createdAt = LocalDateTime.parse(createdAt)
+    members = members ?: emptyList(),
+    createdAt = parseLocalDateTime(createdAt)
 )
 
 fun ProjectEntity.toDomain(): Project = Project(
@@ -79,3 +79,8 @@ fun Task.toDto(): CreateTaskDto = CreateTaskDto(
 )
 
 fun TaskStatus.toDto(): String = name
+
+fun parseLocalDateTime(input: String): LocalDateTime {
+    val cleanInput = if (input.endsWith("Z")) input.removeSuffix("Z") else input
+    return LocalDateTime.parse(cleanInput)
+}

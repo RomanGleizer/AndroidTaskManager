@@ -10,6 +10,7 @@ data class ProjectEntity(
     val title: String,
     val description: String?,
     val ownerId: String,
-    val members: List<String>,
-    val createdAt: LocalDateTime
+    val members: List<String> = emptyList(),
+    val createdAt: LocalDateTime,
+    val lastUpdated: Long = System.currentTimeMillis()
 )

@@ -16,29 +16,38 @@ import ru.university.network.model.CreateTaskDto
 import ru.university.network.model.UpdateStatusDto
 import javax.inject.Inject
 import java.util.UUID
-import java.time.LocalDateTime as JLocalDateTime
 
 class TaskRepositoryImpl @Inject constructor(
     private val dao: TaskDao,
     private val api: TasksApi
 ) : TaskRepository {
 
+    private val cacheDurationMs = 5 * 60 * 1000L
+
     override suspend fun getTasksForProject(projectId: String): List<Task> {
-        val remoteDtos = api.getTasks(projectId)
-        val remoteEntities = remoteDtos.map { it.toEntity() }
-        remoteEntities.forEach { dao.insert(it) }
+        val now = System.currentTimeMillis()
+        val lastUpdate = dao.getLastUpdatedForProject(projectId) ?: 0L
+
+        if (now - lastUpdate > cacheDurationMs) {
+            val remoteDtos = api.getTasks(projectId)
+            val remoteEntities = remoteDtos.map { dto ->
+                dto.toEntity().copy(lastUpdated = now)
+            }
+            remoteEntities.forEach { dao.insert(it) }
+        }
+
         return dao.getForProject(projectId).map { it.toDomain() }
     }
 
-    override suspend fun getTaskById(id: String): Task {
+    override suspend fun getTaskById(projectId: String, id: String): Task {
         dao.getById(id)?.let { return it.toDomain() }
 
-        val all = dao.getForProject("") // <-- нужно получить проектId для правильного вызова
+        val all = dao.getForProject(projectId)
         val found = all.find { it.id == id }
             ?: throw IllegalStateException("Task not found locally or remotely")
 
-        val dto = api.getTaskById(found.projectId, id)
-        val entity = dto.toEntity()
+        val dto = api.getTaskById(projectId, id)
+        val entity = dto.toEntity().copy(lastUpdated = System.currentTimeMillis())
         dao.insert(entity)
         return entity.toDomain()
     }
@@ -48,7 +57,7 @@ class TaskRepositoryImpl @Inject constructor(
         title: String,
         description: String?,
         assignedTo: String,
-        dueDate: JLocalDateTime?
+        dueDate: java.time.LocalDateTime?
     ) {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val dueK = dueDate?.toKotlinLocalDateTime()
@@ -61,7 +70,8 @@ class TaskRepositoryImpl @Inject constructor(
             assignedTo = assignedTo,
             status = TaskStatus.TODO.name,
             createdAt = now,
-            dueDate = dueK
+            dueDate = dueK,
+            lastUpdated = System.currentTimeMillis()
         )
         dao.insert(tempEntity)
 
@@ -72,7 +82,7 @@ class TaskRepositoryImpl @Inject constructor(
             dueDate = dueK?.toString()
         )
         val createdDto = api.createTask(projectId, request)
-        dao.insert(createdDto.toEntity())
+        dao.insert(createdDto.toEntity().copy(lastUpdated = System.currentTimeMillis()))
     }
 
     override suspend fun updateTaskStatus(taskId: String, status: TaskStatus) {
@@ -85,6 +95,6 @@ class TaskRepositoryImpl @Inject constructor(
             taskId,
             UpdateStatusDto(status.name)
         )
-        dao.insert(updatedDto.toEntity())
+        dao.insert(updatedDto.toEntity().copy(lastUpdated = System.currentTimeMillis()))
     }
 }

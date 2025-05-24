@@ -4,5 +4,6 @@ import ru.university.domain.model.Task
 import ru.university.domain.repository.TaskRepository
 
 class GetTaskUseCase(private val repository: TaskRepository) {
-    suspend operator fun invoke(taskId: String): Task = repository.getTaskById(taskId)
+    suspend operator fun invoke(projectId: String, taskId: String): Task =
+        repository.getTaskById(projectId, taskId)
 }

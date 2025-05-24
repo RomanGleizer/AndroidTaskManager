@@ -7,8 +7,10 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.university.domain.model.Project
 import ru.university.domain.model.Task
+import ru.university.domain.model.User
 import ru.university.domain.usecase.AddMemberUseCase
 import ru.university.domain.usecase.GetProjectUseCase
+import ru.university.domain.usecase.GetProjectUsersUseCase
 import ru.university.domain.usecase.GetTasksUseCase
 import javax.inject.Inject
 
@@ -16,17 +18,22 @@ import javax.inject.Inject
 class ProjectDetailViewModel @Inject constructor(
     private val getProjectUseCase: GetProjectUseCase,
     private val getTasksUseCase: GetTasksUseCase,
+    private val getProjectUsersUseCase: GetProjectUsersUseCase,
     private val addMemberUseCase: AddMemberUseCase
 ) : ViewModel() {
+
     private val _uiState = MutableStateFlow(ProjectDetailUiState())
     val uiState: StateFlow<ProjectDetailUiState> = _uiState.asStateFlow()
+
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
 
     fun loadAll(projectId: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                val project: Project = getProjectUseCase(projectId)
-                val tasks: List<Task> = getTasksUseCase(projectId)
+                val project = getProjectUseCase(projectId)
+                val tasks = getTasksUseCase(projectId)
                 _uiState.value = ProjectDetailUiState(project, tasks, false, null)
             } catch (e: Exception) {
                 _uiState.value = ProjectDetailUiState(error = e.message ?: "Ошибка загрузки")
@@ -34,12 +41,23 @@ class ProjectDetailViewModel @Inject constructor(
         }
     }
 
-    fun onAddMember(projectId: String, userId: String) {
+    fun loadProjectUsers(projectId: String) {
         viewModelScope.launch {
             try {
-                addMemberUseCase(projectId, userId)
+                val usersList = getProjectUsersUseCase(projectId)
+                _users.value = usersList
+            } catch (e: Exception) {
+            }
+        }
+    }
+
+    fun onAddMember(projectId: String, inviteId: String) {
+        viewModelScope.launch {
+            try {
+                addMemberUseCase(projectId, inviteId)
                 loadAll(projectId)
-            } catch (_: Exception) {
+                loadProjectUsers(projectId)
+            } catch (e: Exception) {
             }
         }
     }

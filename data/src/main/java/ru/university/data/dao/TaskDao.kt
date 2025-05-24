@@ -16,4 +16,10 @@ interface TaskDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(task: TaskEntity)
+
+    @Query("SELECT lastUpdated FROM projects WHERE id = :id")
+    suspend fun getLastUpdatedById(id: String): Long?
+
+    @Query("SELECT MAX(lastUpdated) FROM tasks WHERE projectId = :projectId")
+    suspend fun getLastUpdatedForProject(projectId: String): Long?
 }

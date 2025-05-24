@@ -1,6 +1,5 @@
 package ru.university.data.repository
 
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import ru.university.domain.model.User
 import ru.university.domain.repository.UserRepository
@@ -17,9 +16,10 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getCurrentUser(): User {
         val dto = api.getProfile()
         return User(
-            id    = dto.id,
-            name  = dto.name,
-            email = dto.email
+            id = dto.id,
+            name = dto.name,
+            email = dto.email,
+            inviteId = dto.inviteId
         )
     }
 
@@ -29,7 +29,8 @@ class UserRepositoryImpl @Inject constructor(
         return User(
             id = resp.userId,
             name = resp.name,
-            email = resp.email
+            email = resp.email,
+            inviteId = resp.inviteId
         )
     }
 
@@ -39,7 +40,8 @@ class UserRepositoryImpl @Inject constructor(
         return User(
             id = resp.userId,
             name = resp.name,
-            email = resp.email
+            email = resp.email,
+            inviteId = resp.inviteId
         )
     }
 

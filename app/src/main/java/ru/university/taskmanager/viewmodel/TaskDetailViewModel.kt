@@ -20,11 +20,11 @@ class TaskDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TaskDetailUiState())
     val uiState: StateFlow<TaskDetailUiState> = _uiState.asStateFlow()
 
-    fun loadTask(taskId: String) {
+    fun loadTask(projectId: String, taskId: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                val task = getTaskByIdUseCase(taskId)
+                val task = getTaskByIdUseCase(projectId, taskId)
                 _uiState.value = TaskDetailUiState(task, false, null)
             } catch (e: Exception) {
                 _uiState.value = TaskDetailUiState(error = e.message ?: "Ошибка загрузки")
@@ -32,10 +32,10 @@ class TaskDetailViewModel @Inject constructor(
         }
     }
 
-    fun onChangeStatus(taskId: String, status: TaskStatus) {
+    fun onChangeStatus(projectId: String, taskId: String, status: TaskStatus) {
         viewModelScope.launch {
             updateTaskStatusUseCase(taskId, status)
-            loadTask(taskId)
+            loadTask(projectId, taskId)
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -26,12 +27,15 @@ import ru.university.taskmanager.viewmodel.TaskDetailViewModel
 @Composable
 fun TaskDetailScreen(
     viewModel: TaskDetailViewModel,
+    projectId: String,
     taskId: String,
     onEdit: (String) -> Unit,
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    LaunchedEffect(taskId) { viewModel.loadTask(taskId) }
+    LaunchedEffect(taskId) {
+        viewModel.loadTask(projectId, taskId)
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -39,7 +43,7 @@ fun TaskDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Назад"
                         )
                     }

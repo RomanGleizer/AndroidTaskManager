@@ -1,8 +1,11 @@
 package ru.university.taskmanager.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ru.university.taskmanager.viewmodel.ProjectsListViewModel
 
@@ -25,7 +29,6 @@ fun ProjectsListScreen(
     onAddProject: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    LaunchedEffect(Unit) { viewModel.loadProjects() }
 
     Scaffold(
         topBar = {
@@ -35,14 +38,15 @@ fun ProjectsListScreen(
                     IconButton(onClick = onAddProject) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Новый проект"
+                            contentDescription = "Новый проект",
+                            tint = Color.Black
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color(0xFFFFEB3B),
+                    titleContentColor = Color.Black,
+                    actionIconContentColor = Color.Black
                 )
             )
         },
@@ -58,19 +62,29 @@ fun ProjectsListScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 8.dp)
                             .clickable { onProjectClick(project.id) },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = Color(0xFFFFF9C4)
                         ),
-                        shape = MaterialTheme.shapes.small,
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        shape = MaterialTheme.shapes.medium,
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        Text(
-                            text = project.title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = project.title,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color.Black
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = project.description ?: "Без описания",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.DarkGray,
+                                maxLines = 2,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }

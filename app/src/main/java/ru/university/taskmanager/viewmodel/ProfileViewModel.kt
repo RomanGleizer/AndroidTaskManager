@@ -1,4 +1,3 @@
-// app/src/main/java/ru/university/taskmanager/viewmodel/ProfileViewModel.kt
 package ru.university.taskmanager.viewmodel
 
 import androidx.lifecycle.ViewModel

@@ -13,5 +13,6 @@ data class TaskEntity(
     val assignedTo: String,
     val status: String,
     val createdAt: LocalDateTime,
-    val dueDate: LocalDateTime?
+    val dueDate: LocalDateTime?,
+    val lastUpdated: Long = System.currentTimeMillis()
 )
