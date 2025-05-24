@@ -1,28 +1,18 @@
 package ru.university.network.api
 
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import ru.university.network.model.ProjectDto
-import ru.university.network.model.CreateProjectRequestDto
-import ru.university.network.model.AddMemberRequestDto
+import retrofit2.http.*
+import ru.university.network.model.*
 
 interface ProjectsApi {
     @GET("projects")
-    suspend fun getAll(): List<ProjectDto>
+    suspend fun getProjects(): List<ProjectDto>
 
     @GET("projects/{id}")
-    suspend fun getById(@Path("id") id: String): ProjectDto
+    suspend fun getProjectById(@Path("id") projectId: String): ProjectDto
 
     @POST("projects")
-    suspend fun create(
-        @Body request: CreateProjectRequestDto
-    ): ProjectDto
+    suspend fun createProject(@Body dto: CreateProjectDto): ProjectDto
 
     @POST("projects/{id}/members")
-    suspend fun addMember(
-        @Path("id") projectId: String,
-        @Body request: AddMemberRequestDto
-    )
+    suspend fun addMember(@Path("id") projectId: String, @Body dto: AddMemberDto)
 }

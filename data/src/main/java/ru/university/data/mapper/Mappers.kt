@@ -1,35 +1,29 @@
 package ru.university.data.mapper
 
-import kotlinx.datetime.Instant
+import ru.university.domain.model.*
+import ru.university.network.model.*
+import ru.university.data.model.*
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import ru.university.data.model.ProjectEntity
-import ru.university.data.model.TaskEntity
-import ru.university.domain.model.Project
-import ru.university.domain.model.Task
-import ru.university.domain.model.TaskStatus
-import ru.university.network.model.ProjectDto
-import ru.university.network.model.TaskDto
-import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
 
-fun ProjectDto.toEntity(): ProjectEntity {
-    val createdAtParsed = runCatching {
-        Instant.parse(createdAt)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-    }.getOrElse {
-        LocalDateTime.parse(createdAt)
-    }
+fun UserDto.toDomain(): User = User(id, name, email)
 
-    return ProjectEntity(
-        id         = id,
-        title      = title,
-        description= description,
-        ownerId    = ownerId,
-        members    = members,
-        createdAt  = createdAtParsed
-    )
-}
+fun ProjectDto.toDomain(): Project = Project(
+    id = id,
+    title = title,
+    description = description,
+    ownerId = ownerId,
+    members = members,
+    createdAt = LocalDateTime.parse(createdAt)
+)
+
+fun ProjectDto.toEntity(): ProjectEntity = ProjectEntity(
+    id = id,
+    title = title,
+    description = description,
+    ownerId = ownerId,
+    members = members,
+    createdAt = LocalDateTime.parse(createdAt)
+)
 
 fun ProjectEntity.toDomain(): Project = Project(
     id = id,
@@ -37,49 +31,7 @@ fun ProjectEntity.toDomain(): Project = Project(
     description = description,
     ownerId = ownerId,
     members = members,
-    createdAt = createdAt.toJavaLocalDateTime()
-)
-
-fun ProjectEntity.toDto(): ProjectDto = ProjectDto(
-    id        = id,
-    title     = title,
-    description = description,
-    ownerId   = ownerId,
-    members   = members,
-    createdAt = createdAt.toString()
-)
-
-fun TaskDto.toEntity(): TaskEntity = TaskEntity(
-    id = id,
-    projectId = projectId,
-    title = title,
-    description = description,
-    assignedTo = assignedTo,
-    status = status,
-    createdAt = createdAt,
-    dueDate = dueDate
-)
-
-fun TaskEntity.toDomain(): Task = Task(
-    id = id,
-    projectId = projectId,
-    title = title,
-    description = description,
-    assignedTo = assignedTo,
-    status = TaskStatus.valueOf(status),
-    createdAt = createdAt.toJavaLocalDateTime(),
-    dueDate = dueDate?.toJavaLocalDateTime()
-)
-
-fun TaskEntity.toDto(): TaskDto = TaskDto(
-    id = id,
-    projectId = projectId,
-    title = title,
-    description = description,
-    assignedTo = assignedTo,
-    status = status,
-    createdAt = createdAt,
-    dueDate = dueDate
+    createdAt = createdAt
 )
 
 fun TaskDto.toDomain(): Task = Task(
@@ -87,8 +39,43 @@ fun TaskDto.toDomain(): Task = Task(
     projectId = projectId,
     title = title,
     description = description,
-    assignedTo = assignedTo,
     status = TaskStatus.valueOf(status),
-    createdAt = createdAt.toJavaLocalDateTime(),
-    dueDate = dueDate?.toJavaLocalDateTime()
+    createdAt = LocalDateTime.parse(createdAt),
+    dueDate = dueDate?.let { LocalDateTime.parse(it) },
+    assignedTo = assignedToId,
+    assignedToName = assignedToName
 )
+
+fun TaskDto.toEntity(): TaskEntity = TaskEntity(
+    id = id,
+    projectId = projectId,
+    title = title,
+    description = description,
+    assignedTo = assignedToId,
+    status = status,
+    createdAt = LocalDateTime.parse(createdAt),
+    dueDate = dueDate?.let { LocalDateTime.parse(it) }
+)
+
+fun TaskEntity.toDomain(): Task = Task(
+    id = id,
+    projectId = projectId,
+    title = title,
+    description = description,
+    status = TaskStatus.valueOf(status),
+    createdAt = createdAt,
+    dueDate = dueDate,
+    assignedTo = assignedTo,
+    assignedToName = ""
+)
+
+fun Project.toDto(): CreateProjectDto = CreateProjectDto(title, description)
+
+fun Task.toDto(): CreateTaskDto = CreateTaskDto(
+    title = title,
+    description = description,
+    assignedToId = assignedTo,
+    dueDate = dueDate?.toString()
+)
+
+fun TaskStatus.toDto(): String = name

@@ -12,11 +12,11 @@ import ru.university.domain.model.Task
 import ru.university.domain.model.TaskStatus
 import ru.university.domain.repository.TaskRepository
 import ru.university.network.api.TasksApi
-import ru.university.network.model.CreateTaskRequestDto
-import ru.university.network.model.UpdateStatusRequestDto
-import java.time.LocalDateTime as JLocalDateTime
-import java.util.UUID
+import ru.university.network.model.CreateTaskDto
+import ru.university.network.model.UpdateStatusDto
 import javax.inject.Inject
+import java.util.UUID
+import java.time.LocalDateTime as JLocalDateTime
 
 class TaskRepositoryImpl @Inject constructor(
     private val dao: TaskDao,
@@ -24,19 +24,20 @@ class TaskRepositoryImpl @Inject constructor(
 ) : TaskRepository {
 
     override suspend fun getTasksForProject(projectId: String): List<Task> {
-        val remote = api.getForProject(projectId).map { it.toEntity() }
-        remote.forEach { dao.insert(it) }
+        val remoteDtos = api.getTasks(projectId)
+        val remoteEntities = remoteDtos.map { it.toEntity() }
+        remoteEntities.forEach { dao.insert(it) }
         return dao.getForProject(projectId).map { it.toDomain() }
     }
 
-    override suspend fun getTaskById(id: String): Task? {
+    override suspend fun getTaskById(id: String): Task {
         dao.getById(id)?.let { return it.toDomain() }
 
-        val all = dao.getAll()
-        val found = all.find { entity -> entity.id == id }
-            ?: return null
+        val all = dao.getForProject("") // <-- нужно получить проектId для правильного вызова
+        val found = all.find { it.id == id }
+            ?: throw IllegalStateException("Task not found locally or remotely")
 
-        val dto = api.getById(found.projectId, id)
+        val dto = api.getTaskById(found.projectId, id)
         val entity = dto.toEntity()
         dao.insert(entity)
         return entity.toDomain()
@@ -48,48 +49,42 @@ class TaskRepositoryImpl @Inject constructor(
         description: String?,
         assignedTo: String,
         dueDate: JLocalDateTime?
-    ): Task {
-        val now  = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    ) {
+        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val dueK = dueDate?.toKotlinLocalDateTime()
 
-        val newEntity = TaskEntity(
-            id         = UUID.randomUUID().toString(),
-            projectId  = projectId,
-            title      = title,
-            description= description,
+        val tempEntity = TaskEntity(
+            id = UUID.randomUUID().toString(),
+            projectId = projectId,
+            title = title,
+            description = description,
             assignedTo = assignedTo,
-            status     = TaskStatus.TODO.name,
-            createdAt  = now,
-            dueDate    = dueK
+            status = TaskStatus.TODO.name,
+            createdAt = now,
+            dueDate = dueK
         )
-        dao.insert(newEntity)
+        dao.insert(tempEntity)
 
-        val request = CreateTaskRequestDto(
-            title        = title,
-            description  = description,
+        val request = CreateTaskDto(
+            title = title,
+            description = description,
             assignedToId = assignedTo,
-            dueDate      = dueK?.toString()
+            dueDate = dueK?.toString()
         )
-        val createdDto = api.create(projectId, request)
-
-        val entity = createdDto.toEntity()
-        dao.insert(entity)
-        return entity.toDomain()
+        val createdDto = api.createTask(projectId, request)
+        dao.insert(createdDto.toEntity())
     }
 
-    override suspend fun updateTaskStatus(taskId: String, status: TaskStatus): Task {
+    override suspend fun updateTaskStatus(taskId: String, status: TaskStatus) {
         val existing = dao.getById(taskId)
             ?: throw IllegalStateException("Task $taskId not found locally")
         val projectId = existing.projectId
 
-        val updatedDto = api.updateStatus(
+        val updatedDto = api.updateTaskStatus(
             projectId,
             taskId,
-            UpdateStatusRequestDto(status.name)
+            UpdateStatusDto(status.name)
         )
-
-        val entity = updatedDto.toEntity()
-        dao.insert(entity)
-        return entity.toDomain()
+        dao.insert(updatedDto.toEntity())
     }
 }

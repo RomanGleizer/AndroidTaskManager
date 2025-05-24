@@ -1,5 +1,4 @@
-// переместите его, например, в app/src/main/java/ru/university/taskmanager/di/UseCaseModule.kt
-package ru.university.taskmanager.di
+package ru.university.data.di
 
 import dagger.Module
 import dagger.Provides
@@ -12,10 +11,10 @@ import ru.university.domain.usecase.AddMemberUseCase
 import ru.university.domain.usecase.CreateProjectUseCase
 import ru.university.domain.usecase.CreateTaskUseCase
 import ru.university.domain.usecase.GetProjectUseCase
-import ru.university.domain.usecase.GetProjectsUseCase
 import ru.university.domain.usecase.GetTaskUseCase
 import ru.university.domain.usecase.GetTasksUseCase
 import ru.university.domain.usecase.GetProfileUseCase
+import ru.university.domain.usecase.GetProjectsUseCase
 import ru.university.domain.usecase.SignInUseCase
 import ru.university.domain.usecase.SignOutUseCase
 import ru.university.domain.usecase.SignUpUseCase

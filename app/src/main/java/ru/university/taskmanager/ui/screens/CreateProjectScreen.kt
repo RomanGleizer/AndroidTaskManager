@@ -54,7 +54,7 @@ fun CreateProjectScreen(
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = {
-                    viewModel.onAddProjectClick(title)
+                    viewModel.onAddProjectClick(title, description)
                     onProjectCreated()
                 },
                 modifier = Modifier.fillMaxWidth()

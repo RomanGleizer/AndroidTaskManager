@@ -1,6 +1,6 @@
 package ru.university.domain.model
 
-import java.time.LocalDateTime
+import kotlinx.datetime.LocalDateTime
 
 data class Project(
     val id: String,
